@@ -40,6 +40,10 @@ tmp/
 *.pid.lock
 data/queue.json
 data/seen-posts.json
+data/usage.json
+data/x-user-cache.json
+!data/usage.example.json
+!data/x-user-cache.example.json
 
 # Coverage
 coverage/

@@ -1,0 +1,9 @@
+{
+  "date": "2026-01-01",
+  "cost": 0,
+  "calls": {
+    "readPost": 0,
+    "readUser": 0,
+    "createPost": 0
+  }
+}

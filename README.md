@@ -99,6 +99,20 @@ Queue items now store structured variants:
 
 Only `selectedText` is sent to the platform during publishing.
 
+## Runtime Data vs Examples
+
+Runtime files in `data/` are local execution state and should not be versioned:
+
+- `data/usage.json`
+- `data/x-user-cache.json`
+
+Versioned example files are provided for documentation and onboarding:
+
+- `data/usage.example.json`
+- `data/x-user-cache.example.json`
+
+Use examples as templates only. Keep runtime files local per machine/environment.
+
 ## Usage
 
 Generate daily queue:
