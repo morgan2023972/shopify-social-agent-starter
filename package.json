@@ -4,8 +4,11 @@
     "daily": "tsx src/jobs/daily.ts",
     "queue:list": "tsx src/index.ts queue:list",
     "queue:approve": "tsx src/index.ts queue:approve",
+    "queue:reject": "tsx src/index.ts queue:reject",
+    "queue:cleanup": "tsx src/index.ts queue:cleanup",
     "publish": "tsx src/index.ts publish",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@types/node": "^22.10.2",
@@ -16,6 +19,7 @@
   },
   "devDependencies": {
     "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.9"
   }
 }

@@ -20,22 +20,27 @@ cp .env.example .env
 
 ## Environment Setup
 
-Create and configure `.env` with your API credentials.
+Create and configure `.env` with the values required for your workflow.
 
-Required values:
+Required for reading + AI generation (daily queue workflow):
 
-- `OPENAI_API_KEY`
-- `X_BEARER_TOKEN`
+- `OPENAI_API_KEY` (comment generation)
+- `X_BEARER_TOKEN` (read-only access to public X posts)
+
+Optional runtime values:
+
+- `DRY_RUN=true` (default and recommended)
+- `MAX_COMMENTS_PER_DAY=5`
+- `MIN_SCORE_TO_QUEUE=70`
+
+Required only for real publishing (`DRY_RUN=false`):
+
 - `X_APP_KEY`
 - `X_APP_SECRET`
 - `X_ACCESS_TOKEN`
 - `X_ACCESS_SECRET`
 
-Optional runtime values:
-
-- `DRY_RUN=true` (default, recommended)
-- `MAX_COMMENTS_PER_DAY=5`
-- `MIN_SCORE_TO_QUEUE=70`
+X write credentials are not required for testing, queue generation, listing, or approval when `DRY_RUN=true`.
 
 ## Configure Targets
 
@@ -81,7 +86,10 @@ Queue items now store structured variants:
 }
 ```
 
-Only `selectedText` is published. `reviewText` is never published.
+- `text`: publishable reply content. This is the candidate used to set `selectedText`.
+- `reviewText`: reviewer-facing wording for internal moderation only, never published.
+
+Only `selectedText` is sent to the platform during publishing.
 
 ## Usage
 
@@ -109,7 +117,11 @@ Publish approved items:
 npm run publish
 ```
 
+With the default `DRY_RUN=true`, this command does not publish on X. It only logs what would be published.
+
 Real publishing (disable dry run):
+
+Warning: this enables live posting on X. Use it only after review and only when X write credentials are configured (`X_APP_KEY`, `X_APP_SECRET`, `X_ACCESS_TOKEN`, `X_ACCESS_SECRET`).
 
 ```bash
 DRY_RUN=false npm run publish

@@ -1,5 +1,7 @@
 import { approveQueueItem, getQueue } from "./queue/queueService";
 import { publishApproved } from "./publish/publishApproved";
+import { rejectQueueItemCommand } from "./cli/rejectQueueItem";
+import { cleanupQueueCommand } from "./cli/cleanupQueue";
 
 async function main() {
   const [cmd, arg1, arg2] = process.argv.slice(2);
@@ -10,6 +12,8 @@ Commands:
   npm run daily
   npm run queue:list
   npm run queue:approve -- <id> [variantIndex]
+  npm run queue:reject -- <id>
+  npm run queue:cleanup
   npm run publish
 `);
     return;
@@ -40,6 +44,16 @@ Commands:
     const variantIndex = arg2 ? Number(arg2) : 0;
     const item = await approveQueueItem(arg1, variantIndex);
     console.log(`Approved ${item.id}: ${item.selectedText}`);
+    return;
+  }
+
+  if (cmd === "queue:reject") {
+    await rejectQueueItemCommand(arg1);
+    return;
+  }
+
+  if (cmd === "queue:cleanup") {
+    await cleanupQueueCommand();
     return;
   }
 

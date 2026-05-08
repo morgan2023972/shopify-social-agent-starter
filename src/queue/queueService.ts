@@ -152,3 +152,46 @@ export async function approveQueueItem(
   await saveQueue(queue);
   return item;
 }
+
+const CLEANUP_DEFAULT_STATUSES: QueueItem["status"][] = [
+  "rejected",
+  "published",
+];
+
+export async function cleanupQueue(options?: {
+  statuses?: QueueItem["status"][];
+}): Promise<{ removed: number; kept: number }> {
+  const statusesToRemove = options?.statuses ?? CLEANUP_DEFAULT_STATUSES;
+  const queue = await getQueue();
+
+  const kept = queue.filter((item) => !statusesToRemove.includes(item.status));
+  const removed = queue.length - kept.length;
+
+  await saveQueue(kept);
+  return { removed, kept: kept.length };
+}
+
+export async function rejectQueueItem(id: string): Promise<void> {
+  const queue = await getQueue();
+  const item = queue.find((q) => q.id === id);
+
+  if (!item) {
+    throw new Error("Queue item not found");
+  }
+
+  if (item.status !== "pending") {
+    throw new Error(`Cannot reject item with status: ${item.status}`);
+  }
+
+  const updatedQueue = queue.map((entry) =>
+    entry.id === id
+      ? {
+          ...entry,
+          status: "rejected" as const,
+          selectedText: undefined,
+        }
+      : entry,
+  );
+
+  await saveQueue(updatedQueue);
+}
