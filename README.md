@@ -1,5 +1,8 @@
 # Shopify Social Agent
 
+![CI](https://github.com/morgan2023972/shopify-social-agent-starter/actions/workflows/ci.yml/badge.svg)
+![Coverage](https://img.shields.io/badge/coverage-vitest-blue)
+
 AI agent for a Node.js + TypeScript CLI workflow that reads X posts, scores relevance, generates reply variants, and publishes only approved comments.
 
 ## Features
