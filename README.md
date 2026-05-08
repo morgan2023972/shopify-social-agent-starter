@@ -194,3 +194,14 @@ npm run queue:migrate -- --apply
 - Local dashboard UI for queue moderation
 - Advanced multilingual generation/review controls
 - Scheduled automation and reporting
+
+## Security
+
+GitHub may report moderate vulnerabilities in transitive dev dependencies
+(Vite / Vitest / esbuild).
+
+This project is a local CLI tool and is not exposed as a public service,
+so there is no direct production impact.
+
+These issues are tracked and will be addressed during a controlled
+dependency upgrade cycle.
