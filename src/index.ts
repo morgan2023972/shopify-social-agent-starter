@@ -2,18 +2,27 @@ import { approveQueueItem, getQueue } from "./queue/queueService";
 import { publishApproved } from "./publish/publishApproved";
 import { rejectQueueItemCommand } from "./cli/rejectQueueItem";
 import { cleanupQueueCommand } from "./cli/cleanupQueue";
+import { migrateQueueCommand } from "./cli/migrateQueue";
+import { usageResetCommand, usageShowCommand } from "./cli/usageCommands";
+import { dailyEstimateCommand } from "./cli/dailyEstimate";
+import { renderQueueItems } from "./cli/renderQueue";
 
 async function main() {
-  const [cmd, arg1, arg2] = process.argv.slice(2);
+  const args = process.argv.slice(2);
+  const [cmd, arg1, arg2] = args;
 
   if (!cmd || cmd === "help") {
     console.log(`
 Commands:
   npm run daily
+  npm run daily:estimate
   npm run queue:list
   npm run queue:approve -- <id> [variantIndex]
   npm run queue:reject -- <id>
   npm run queue:cleanup
+  npm run queue:migrate [-- --apply]
+  npm run usage:show
+  npm run usage:reset
   npm run publish
 `);
     return;
@@ -21,21 +30,8 @@ Commands:
 
   if (cmd === "queue:list") {
     const queue = await getQueue();
-    for (const item of queue) {
-      console.log("\n---");
-      console.log(
-        `${item.id} | ${item.status} | score=${item.score} | @${item.targetHandle}`,
-      );
-      console.log(
-        `Lang: post=${item.postLanguage} publish=${item.publishLanguage}`,
-      );
-      console.log(item.sourcePostUrl);
-      console.log(`Reason: ${item.reason}`);
-      item.variants.forEach((variant, i) => {
-        console.log(`  [${i}] text: ${variant.text}`);
-        console.log(`      reviewText: ${variant.reviewText}`);
-      });
-    }
+    const output = renderQueueItems(queue);
+    console.log(output);
     return;
   }
 
@@ -54,6 +50,27 @@ Commands:
 
   if (cmd === "queue:cleanup") {
     await cleanupQueueCommand();
+    return;
+  }
+
+  if (cmd === "queue:migrate") {
+    const apply = args.includes("--apply");
+    await migrateQueueCommand({ apply });
+    return;
+  }
+
+  if (cmd === "usage:show") {
+    await usageShowCommand();
+    return;
+  }
+
+  if (cmd === "usage:reset") {
+    await usageResetCommand();
+    return;
+  }
+
+  if (cmd === "daily:estimate") {
+    await dailyEstimateCommand();
     return;
   }
 

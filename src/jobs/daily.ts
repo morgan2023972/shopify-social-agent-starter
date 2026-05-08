@@ -21,7 +21,10 @@ async function main() {
     }
 
     console.log(`Reading @${target.handle}...`);
-    const posts = await fetchRecentUserPosts(target.handle, 5);
+    const posts = await fetchRecentUserPosts(
+      target.handle,
+      config.maxPostsPerAccount,
+    );
 
     for (const post of posts) {
       if (queuedToday >= config.maxCommentsPerDay) break;

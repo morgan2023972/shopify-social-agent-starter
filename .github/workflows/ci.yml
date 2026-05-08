@@ -29,3 +29,7 @@ jobs:
 
       - name: Test Coverage
         run: npm run test:coverage
+
+      - name: Security audit
+        run: npm audit --audit-level=moderate
+        continue-on-error: true

@@ -11,6 +11,28 @@ const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY, timeout: 30_000 });
 
 const DEFAULT_REVIEW_LANGUAGE: LanguageCode = "fr";
 
+function normalizeLanguage(
+  value: unknown,
+  fallback: LanguageCode,
+): LanguageCode {
+  return value === "fr" ? "fr" : value === "en" ? "en" : fallback;
+}
+
+function resolvePublishLanguage(params: {
+  postLanguage: LanguageCode;
+  reviewLanguage: LanguageCode;
+  languageMode: Target["languageMode"];
+}): LanguageCode {
+  if (params.languageMode === "target-review-language") {
+    return params.reviewLanguage;
+  }
+  return params.postLanguage;
+}
+
+function clampVariantText(value: string): string {
+  return value.length > 260 ? value.slice(0, 260) : value;
+}
+
 export async function generateCommentVariants(
   post: ScoredPost,
   target: Target,
@@ -19,7 +41,7 @@ export async function generateCommentVariants(
   const reviewLanguage = target.reviewLanguage ?? DEFAULT_REVIEW_LANGUAGE;
 
   const prompt = `
-Tu es un développeur Shopify francophone qui construit des outils gratuits pour développeurs Shopify.
+Tu es un développeur Shopify qui construit des outils gratuits pour développeurs Shopify.
 
 Objectif:
 Écrire des réponses naturelles, utiles et crédibles à un post X.
@@ -61,6 +83,7 @@ Génère exactement 3 variantes, au format JSON:
 Règles de sortie:
 - text doit être rédigé en publishLanguage.
 - reviewText doit être rédigé en reviewLanguage pour relecture humaine.
+- Respect strict du mode de langue demandé.
 `;
 
   const response = await openai.chat.completions.create({
@@ -79,8 +102,11 @@ Règles de sortie:
 
   const fallback: GeneratedCommentPayload = {
     postLanguage: "en",
-    publishLanguage:
-      languageMode === "target-review-language" ? reviewLanguage : "en",
+    publishLanguage: resolvePublishLanguage({
+      postLanguage: "en",
+      reviewLanguage,
+      languageMode,
+    }),
     variants: [],
   };
 
@@ -89,16 +115,19 @@ Règles de sortie:
   try {
     const parsed = JSON.parse(raw);
 
-    const postLanguage: LanguageCode =
-      parsed.postLanguage === "fr" ? "fr" : "en";
-    const publishLanguage: LanguageCode =
-      parsed.publishLanguage === "fr" ? "fr" : "en";
+    const postLanguage = normalizeLanguage(parsed.postLanguage, "en");
+    const publishLanguage = resolvePublishLanguage({
+      postLanguage,
+      reviewLanguage,
+      languageMode,
+    });
     const variants = Array.isArray(parsed.variants)
       ? parsed.variants
           .slice(0, 3)
           .map((variant: unknown) => {
             if (typeof variant === "string") {
-              return { text: variant, reviewText: variant };
+              const clean = clampVariantText(variant.trim());
+              return clean ? { text: clean, reviewText: clean } : null;
             }
             if (variant && typeof variant === "object") {
               const text =
@@ -110,7 +139,14 @@ Règles de sortie:
                 "string"
                   ? (variant as { reviewText: string }).reviewText
                   : text;
-              return text ? { text, reviewText } : null;
+              const cleanText = clampVariantText(text.trim());
+              const cleanReviewText = clampVariantText(reviewText.trim());
+              return cleanText
+                ? {
+                    text: cleanText,
+                    reviewText: cleanReviewText || cleanText,
+                  }
+                : null;
             }
             return null;
           })

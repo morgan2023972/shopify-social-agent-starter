@@ -20,6 +20,7 @@ function normalizeVariant(
   variant: unknown,
   postLanguage: LanguageCode,
   publishLanguage: LanguageCode,
+  reviewLanguage: LanguageCode,
 ): QueueVariant | null {
   if (typeof variant === "string") {
     return {
@@ -27,6 +28,7 @@ function normalizeVariant(
       reviewText: variant,
       postLanguage,
       publishLanguage,
+      reviewLanguage,
     };
   }
 
@@ -55,6 +57,10 @@ function normalizeVariant(
       (variant as { publishLanguage?: unknown }).publishLanguage,
       publishLanguage,
     ),
+    reviewLanguage: normalizeLanguage(
+      (variant as { reviewLanguage?: unknown }).reviewLanguage,
+      reviewLanguage,
+    ),
   };
 }
 
@@ -67,11 +73,20 @@ function normalizeQueueItem(raw: QueueItem | LegacyQueueItem): QueueItem {
     (raw as { publishLanguage?: unknown }).publishLanguage,
     postLanguage,
   );
+  const reviewLanguage = normalizeLanguage(
+    (raw as { reviewLanguage?: unknown }).reviewLanguage,
+    publishLanguage,
+  );
 
   const variants = Array.isArray(raw.variants)
     ? raw.variants
         .map((variant) =>
-          normalizeVariant(variant, postLanguage, publishLanguage),
+          normalizeVariant(
+            variant,
+            postLanguage,
+            publishLanguage,
+            reviewLanguage,
+          ),
         )
         .filter((variant): variant is QueueVariant => variant !== null)
     : [];
@@ -80,6 +95,7 @@ function normalizeQueueItem(raw: QueueItem | LegacyQueueItem): QueueItem {
     ...raw,
     postLanguage,
     publishLanguage,
+    reviewLanguage,
     variants,
   };
 }
@@ -111,6 +127,7 @@ export async function addToQueue(params: {
     reviewText: variant.reviewText,
     postLanguage: params.generated.postLanguage,
     publishLanguage: params.generated.publishLanguage,
+    reviewLanguage: params.target.reviewLanguage,
   }));
 
   const item: QueueItem = {
@@ -126,6 +143,7 @@ export async function addToQueue(params: {
     reason: params.post.reason,
     postLanguage: params.generated.postLanguage,
     publishLanguage: params.generated.publishLanguage,
+    reviewLanguage: params.target.reviewLanguage,
     variants,
     selectedText: variants[0]?.text,
     status: "pending",

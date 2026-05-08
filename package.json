@@ -2,15 +2,21 @@
   "scripts": {
     "dev": "tsx src/index.ts",
     "daily": "tsx src/jobs/daily.ts",
+    "daily:estimate": "tsx src/index.ts daily:estimate",
     "queue:list": "tsx src/index.ts queue:list",
     "queue:approve": "tsx src/index.ts queue:approve",
     "queue:reject": "tsx src/index.ts queue:reject",
     "queue:cleanup": "tsx src/index.ts queue:cleanup",
+    "queue:migrate": "tsx src/index.ts queue:migrate",
+    "usage:show": "tsx src/index.ts usage:show",
+    "usage:reset": "tsx src/index.ts usage:reset",
     "publish": "tsx src/index.ts publish",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "zip:analysis": "powershell -ExecutionPolicy Bypass -File scripts/zip-project.ps1 -Mode analysis",
+    "zip:release": "powershell -ExecutionPolicy Bypass -File scripts/zip-project.ps1 -Mode release"
   },
   "dependencies": {
     "@types/node": "^22.10.2",

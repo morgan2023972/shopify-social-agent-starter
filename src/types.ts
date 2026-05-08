@@ -37,6 +37,7 @@ export type QueueVariant = {
   reviewText: string;
   postLanguage: LanguageCode;
   publishLanguage: LanguageCode;
+  reviewLanguage?: LanguageCode;
 };
 
 export type GeneratedCommentPayload = {
@@ -58,6 +59,7 @@ export type QueueItem = {
   reason: string;
   postLanguage: LanguageCode;
   publishLanguage: LanguageCode;
+  reviewLanguage?: LanguageCode;
   variants: QueueVariant[];
   selectedText?: string;
   status: "pending" | "approved" | "published" | "rejected" | "failed";
@@ -73,4 +75,16 @@ export type LegacyQueueItem = Omit<
   postLanguage?: LanguageCode;
   publishLanguage?: LanguageCode;
   variants: string[];
+};
+
+export type UsageCallType = "readPost" | "readUser" | "createPost";
+
+export type UsageStats = {
+  date: string;
+  cost: number;
+  calls: {
+    readPost: number;
+    readUser: number;
+    createPost: number;
+  };
 };

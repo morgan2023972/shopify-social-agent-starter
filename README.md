@@ -34,7 +34,12 @@ Optional runtime values:
 
 - `DRY_RUN=true` (default and recommended)
 - `MAX_COMMENTS_PER_DAY=5`
+- `MAX_POSTS_PER_ACCOUNT=5`
 - `MIN_SCORE_TO_QUEUE=70`
+- `DAILY_BUDGET_USD=1.0`
+- `COST_PER_POST_READ=0.005`
+- `COST_PER_USER_READ=0.01`
+- `COST_PER_POST_CREATE=0.01`
 
 Required only for real publishing (`DRY_RUN=false`):
 
@@ -102,6 +107,12 @@ Generate daily queue:
 npm run daily
 ```
 
+Estimate daily read cost (simulation only):
+
+```bash
+npm run daily:estimate
+```
+
 List queue:
 
 ```bash
@@ -130,12 +141,39 @@ Warning: this enables live posting on X. Use it only after review and only when 
 DRY_RUN=false npm run publish
 ```
 
+Show usage (daily budget tracker):
+
+```bash
+npm run usage:show
+```
+
+Reset usage tracker (required if `data/usage.json` is missing/corrupted):
+
+```bash
+npm run usage:reset
+```
+
+Queue migration preview (dry-run by default):
+
+```bash
+npm run queue:migrate
+```
+
+Apply queue migration:
+
+```bash
+npm run queue:migrate -- --apply
+```
+
 ## Security
 
 - Never commit `.env`, API keys, or access tokens
 - Keep credentials only in environment variables
 - Rotate keys immediately if exposed
 - Keep `DRY_RUN=true` in non-production workflows
+- CI runs `npm audit --audit-level=moderate` in a dedicated non-blocking step for visibility.
+- Current vulnerabilities, if any, are tracked and must be reviewed before production release.
+- `npm audit` currently reports moderate vulnerabilities. These are tracked and will be resolved before production release.
 
 ## Roadmap
 
