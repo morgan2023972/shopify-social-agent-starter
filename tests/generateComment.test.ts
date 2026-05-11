@@ -29,7 +29,7 @@ function makeTarget(overrides?: Partial<Target>): Target {
   };
 }
 
-function makePost(): ScoredPost {
+function makePost(overrides?: Partial<ScoredPost>): ScoredPost {
   return {
     id: "p1",
     platform: "x",
@@ -38,6 +38,7 @@ function makePost(): ScoredPost {
     url: "https://x.com/dev/status/1",
     score: 90,
     reason: "high relevance",
+    ...overrides,
   };
 }
 
@@ -48,15 +49,18 @@ describe("generateCommentVariants multilingual", () => {
     process.env.OPENAI_API_KEY = "test-key";
   });
 
-  it("enforces publishLanguage=postLanguage in match-post mode", async () => {
+  it("supports EN post with auto mode and FR review text", async () => {
     createMock.mockResolvedValue({
       choices: [
         {
           message: {
             content: JSON.stringify({
-              postLanguage: "fr",
-              publishLanguage: "en",
-              variants: [{ text: "Salut", reviewText: "Hi" }],
+              variants: [
+                {
+                  text: "Great update for dev tools.",
+                  reviewText: "Super mise a jour pour les outils dev.",
+                },
+              ],
             }),
           },
         },
@@ -66,24 +70,62 @@ describe("generateCommentVariants multilingual", () => {
     const { generateCommentVariants } =
       await import("../src/agents/generateComment");
     const out = await generateCommentVariants(
-      makePost(),
-      makeTarget({ languageMode: "match-post", reviewLanguage: "en" }),
+      makePost({
+        text: "This dev tools update improves storefront workflows.",
+      }),
+      makeTarget({ languageMode: "auto", reviewLanguage: "fr" }),
+    );
+
+    expect(out.postLanguage).toBe("en");
+    expect(out.publishLanguage).toBe("en");
+    expect(out.variants).toHaveLength(1);
+    expect(out.variants[0].text).toContain("dev tools");
+    expect(out.variants[0].reviewText).toContain("mise a jour");
+  });
+
+  it("supports FR post with auto mode", async () => {
+    createMock.mockResolvedValue({
+      choices: [
+        {
+          message: {
+            content: JSON.stringify({
+              variants: [
+                {
+                  text: "Belle amelioration pour les developpeurs Shopify.",
+                },
+              ],
+            }),
+          },
+        },
+      ],
+    });
+
+    const { generateCommentVariants } =
+      await import("../src/agents/generateComment");
+    const out = await generateCommentVariants(
+      makePost({ text: "Une mise a jour tres utile pour les devs Shopify." }),
+      makeTarget({
+        languageMode: "auto",
+        reviewLanguage: "fr",
+      }),
     );
 
     expect(out.postLanguage).toBe("fr");
     expect(out.publishLanguage).toBe("fr");
-    expect(out.variants).toHaveLength(1);
+    expect(out.variants[0].reviewText).toBeUndefined();
   });
 
-  it("enforces publishLanguage=reviewLanguage in target-review-language mode", async () => {
+  it("supports explicit override languageMode=fr", async () => {
     createMock.mockResolvedValue({
       choices: [
         {
           message: {
             content: JSON.stringify({
-              postLanguage: "en",
-              publishLanguage: "en",
-              variants: [{ text: "Looks great", reviewText: "Looks great" }],
+              variants: [
+                {
+                  text: "Bonne perspective cote performance storefront.",
+                },
+              ],
             }),
           },
         },
@@ -93,7 +135,60 @@ describe("generateCommentVariants multilingual", () => {
     const { generateCommentVariants } =
       await import("../src/agents/generateComment");
     const out = await generateCommentVariants(
-      makePost(),
+      makePost({ text: "This update improves tools for storefront devs." }),
+      makeTarget({ languageMode: "fr", reviewLanguage: "fr" }),
+    );
+
+    expect(out.postLanguage).toBe("en");
+    expect(out.publishLanguage).toBe("fr");
+  });
+
+  it("keeps legacy match-post behavior as auto", async () => {
+    createMock.mockResolvedValue({
+      choices: [
+        {
+          message: {
+            content: JSON.stringify({
+              variants: [{ text: "Analyse utile pour les themes Shopify." }],
+            }),
+          },
+        },
+      ],
+    });
+
+    const { generateCommentVariants } =
+      await import("../src/agents/generateComment");
+    const out = await generateCommentVariants(
+      makePost({ text: "Les outils themes Shopify sont tres utiles." }),
+      makeTarget({ languageMode: "match-post", reviewLanguage: "fr" }),
+    );
+
+    expect(out.postLanguage).toBe("fr");
+    expect(out.publishLanguage).toBe("fr");
+  });
+
+  it("keeps legacy target-review-language behavior", async () => {
+    createMock.mockResolvedValue({
+      choices: [
+        {
+          message: {
+            content: JSON.stringify({
+              variants: [
+                {
+                  text: "Tres bon signal sur la qualite de review.",
+                  reviewText: "Tres bon signal sur la qualite de review.",
+                },
+              ],
+            }),
+          },
+        },
+      ],
+    });
+
+    const { generateCommentVariants } =
+      await import("../src/agents/generateComment");
+    const out = await generateCommentVariants(
+      makePost({ text: "This update helps app review tools." }),
       makeTarget({
         languageMode: "target-review-language",
         reviewLanguage: "fr",
@@ -121,10 +216,13 @@ describe("generateCommentVariants multilingual", () => {
 
     const { generateCommentVariants } =
       await import("../src/agents/generateComment");
-    const out = await generateCommentVariants(makePost(), makeTarget());
+    const out = await generateCommentVariants(
+      makePost(),
+      makeTarget({ languageMode: "auto", reviewLanguage: "en" }),
+    );
 
     expect(out.variants[0].text.length).toBe(260);
-    expect(out.variants[0].reviewText.length).toBe(260);
+    expect(out.variants[0].reviewText).toBeUndefined();
     expect(out.variants[1].text).toBe("ok");
   });
 

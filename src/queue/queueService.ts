@@ -44,7 +44,7 @@ function normalizeVariant(
   const reviewText =
     typeof (variant as { reviewText?: unknown }).reviewText === "string"
       ? (variant as { reviewText: string }).reviewText
-      : text;
+      : undefined;
 
   return {
     text,
@@ -127,7 +127,7 @@ export async function addToQueue(params: {
     reviewText: variant.reviewText,
     postLanguage: params.generated.postLanguage,
     publishLanguage: params.generated.publishLanguage,
-    reviewLanguage: params.target.reviewLanguage,
+    reviewLanguage: params.target.reviewLanguage ?? "fr",
   }));
 
   const item: QueueItem = {
@@ -143,7 +143,7 @@ export async function addToQueue(params: {
     reason: params.post.reason,
     postLanguage: params.generated.postLanguage,
     publishLanguage: params.generated.publishLanguage,
-    reviewLanguage: params.target.reviewLanguage,
+    reviewLanguage: params.target.reviewLanguage ?? "fr",
     variants,
     selectedText: variants[0]?.text,
     status: "pending",

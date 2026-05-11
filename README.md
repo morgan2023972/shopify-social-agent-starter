@@ -57,8 +57,10 @@ Edit `data/targets.json`.
 Multilingual target fields:
 
 - `languageMode`
-  - `match-post`: publish in detected source post language
-  - `target-review-language`: publish in `reviewLanguage`
+  - `auto`: publish in detected source post language
+  - `en` or `fr`: force publish language
+  - legacy `match-post`: same behavior as `auto`
+  - legacy `target-review-language`: publish in `reviewLanguage`
 - `reviewLanguage`: reviewer language (`fr` or `en`)
 
 Example:
@@ -70,10 +72,20 @@ Example:
   "handle": "ShopifyDevs",
   "priority": 1,
   "angle": "Shopify dev tools, Liquid, themes, Hydrogen",
-  "languageMode": "match-post",
+  "languageMode": "auto",
   "reviewLanguage": "fr"
 }
 ```
+
+## Multi-language behavior
+
+- `postLanguage`: language detected from source post text.
+- `publishLanguage`: language used for the published comment text.
+- `reviewLanguage`: language used for human review text.
+- `languageMode=auto`: `publishLanguage` follows `postLanguage`.
+- `languageMode=en|fr`: forces `publishLanguage`.
+- legacy `match-post`: behaves like `auto`.
+- legacy `target-review-language`: uses `reviewLanguage` as `publishLanguage`.
 
 ## Queue Format (Current)
 

@@ -17,7 +17,7 @@ export function renderQueueItems(items: QueueItem[]): string {
 
     item.variants.forEach((variant, i) => {
       lines.push(`  [${i}] text: ${variant.text}`);
-      lines.push(`      reviewText: ${variant.reviewText}`);
+      lines.push(`      reviewText: ${variant.reviewText ?? variant.text}`);
     });
   }
 

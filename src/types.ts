@@ -1,7 +1,12 @@
 export type Platform = "x" | "devto";
 
 export type LanguageCode = "fr" | "en";
-export type LanguageMode = "match-post" | "target-review-language";
+export type LanguageMode =
+  | "auto"
+  | "en"
+  | "fr"
+  | "match-post"
+  | "target-review-language";
 
 export type Target = {
   id: string;
@@ -9,8 +14,8 @@ export type Target = {
   handle: string;
   priority: number;
   angle: string;
-  languageMode: LanguageMode;
-  reviewLanguage: LanguageCode;
+  languageMode?: LanguageMode;
+  reviewLanguage?: LanguageCode;
 };
 
 export type SocialPost = {
@@ -34,7 +39,7 @@ export type ScoredPost = SocialPost & {
 
 export type QueueVariant = {
   text: string;
-  reviewText: string;
+  reviewText?: string;
   postLanguage: LanguageCode;
   publishLanguage: LanguageCode;
   reviewLanguage?: LanguageCode;
