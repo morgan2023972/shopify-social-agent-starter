@@ -26,26 +26,67 @@ async function main() {
       config.maxPostsPerAccount,
     );
 
+    console.log(
+      `[debug] target=@${target.handle} fetched=${posts.length} posts`,
+    );
+
     for (const post of posts) {
-      if (queuedToday >= config.maxCommentsPerDay) break;
-      if (seen.has(post.id)) continue;
+      const snippet = post.text.slice(0, 80).replace(/\n/g, " ");
+
+      if (queuedToday >= config.maxCommentsPerDay) {
+        console.log(
+          `[debug] post=${post.id} target=@${target.handle} decision=skip reason="max comments reached (${queuedToday}/${config.maxCommentsPerDay})" text="${snippet}"`,
+        );
+        break;
+      }
+
+      if (seen.has(post.id)) {
+        console.log(
+          `[debug] post=${post.id} target=@${target.handle} decision=skip reason="already processed" text="${snippet}"`,
+        );
+        continue;
+      }
+
+      if (!post.text.trim()) {
+        seen.add(post.id);
+        console.log(
+          `[debug] post=${post.id} target=@${target.handle} decision=skip reason="empty text"`,
+        );
+        continue;
+      }
 
       const scored = scorePost(post, target);
       seen.add(post.id);
 
       if (scored.score < config.minScoreToQueue) {
-        console.log(`Skipped ${post.url} score=${scored.score}`);
+        console.log(
+          `[debug] post=${post.id} target=@${target.handle} score=${scored.score} min=${config.minScoreToQueue} decision=skip reason="score below threshold" text="${snippet}"`,
+        );
         continue;
       }
 
+      console.log(
+        `[debug] post=${post.id} target=@${target.handle} score=${scored.score} min=${config.minScoreToQueue} decision=generate text="${snippet}"`,
+      );
+
       const generated = await generateCommentVariants(scored, target);
+
       if (generated.variants.length === 0) {
-        console.log(`No variants generated for ${post.url}`);
+        console.log(
+          `[debug] post=${post.id} target=@${target.handle} decision=skip reason="generation failed (0 variants)"`,
+        );
         continue;
       }
+
+      console.log(
+        `[debug] post=${post.id} target=@${target.handle} variants=${generated.variants.length} → queuing`,
+      );
 
       const item = await addToQueue({ target, post: scored, generated });
       queuedToday += 1;
+      console.log(
+        `[debug] post=${post.id} target=@${target.handle} decision=queued id=${item.id} queuedToday=${queuedToday}/${config.maxCommentsPerDay}`,
+      );
       console.log(
         `Queued ${item.id} score=${item.score} ${item.sourcePostUrl}`,
       );

@@ -3,7 +3,11 @@ import { publishApproved } from "./publish/publishApproved";
 import { rejectQueueItemCommand } from "./cli/rejectQueueItem";
 import { cleanupQueueCommand } from "./cli/cleanupQueue";
 import { migrateQueueCommand } from "./cli/migrateQueue";
-import { usageResetCommand, usageShowCommand } from "./cli/usageCommands";
+import {
+  resetProcessedCommand,
+  usageResetCommand,
+  usageShowCommand,
+} from "./cli/usageCommands";
 import { dailyEstimateCommand } from "./cli/dailyEstimate";
 import { renderQueueItems } from "./cli/renderQueue";
 
@@ -23,6 +27,7 @@ Commands:
   npm run queue:migrate [-- --apply]
   npm run usage:show
   npm run usage:reset
+  npm run dev:reset-processed
   npm run publish
 `);
     return;
@@ -66,6 +71,11 @@ Commands:
 
   if (cmd === "usage:reset") {
     await usageResetCommand();
+    return;
+  }
+
+  if (cmd === "dev:reset-processed") {
+    await resetProcessedCommand();
     return;
   }
 

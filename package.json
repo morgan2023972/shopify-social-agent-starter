@@ -1,6 +1,7 @@
 {
   "scripts": {
     "dev": "tsx src/index.ts",
+    "dashboard": "tsx src/dashboard/server.ts",
     "daily": "tsx src/jobs/daily.ts",
     "daily:estimate": "tsx src/index.ts daily:estimate",
     "queue:list": "tsx src/index.ts queue:list",
@@ -10,6 +11,7 @@
     "queue:migrate": "tsx src/index.ts queue:migrate",
     "usage:show": "tsx src/index.ts usage:show",
     "usage:reset": "tsx src/index.ts usage:reset",
+    "dev:reset-processed": "tsx src/index.ts dev:reset-processed",
     "publish": "tsx src/index.ts publish",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --pool=forks --poolOptions.forks.singleFork=true",

@@ -1,4 +1,5 @@
 import { config } from "../config";
+import { readJson, writeJson } from "../storage/jsonStore";
 import { getUsage, resetUsage } from "../utils/usageTracker";
 
 export async function usageShowCommand(): Promise<void> {
@@ -17,4 +18,11 @@ export async function usageShowCommand(): Promise<void> {
 export async function usageResetCommand(): Promise<void> {
   const usage = await resetUsage();
   console.log(`Usage reset for ${usage.date}.`);
+}
+
+export async function resetProcessedCommand(): Promise<void> {
+  const seen = await readJson<string[]>("seen-posts.json", []);
+  const count = seen.length;
+  await writeJson("seen-posts.json", []);
+  console.log(`Cleared ${count} processed post ID(s) from seen-posts.json.`);
 }
