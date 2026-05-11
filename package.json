@@ -12,9 +12,9 @@
     "usage:reset": "tsx src/index.ts usage:reset",
     "publish": "tsx src/index.ts publish",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --pool=forks --poolOptions.forks.singleFork=true",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
+    "test:coverage": "vitest run --coverage --pool=forks --poolOptions.forks.singleFork=true",
     "zip:analysis": "powershell -ExecutionPolicy Bypass -File scripts/zip-project.ps1 -Mode analysis",
     "zip:release": "powershell -ExecutionPolicy Bypass -File scripts/zip-project.ps1 -Mode release"
   },
